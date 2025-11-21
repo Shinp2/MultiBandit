@@ -33,7 +33,7 @@ python3 Multibandit.py
 Kやepsilonを変更して平均報酬をグラフとして出力したいならexperiment_ar.pyを使用します
 --timesオプションでラウンド数をきめることができます
 ```fish
-python3 experiment_ar.py --times 10 100 1000 --fixed-time 1000 --repeats 20 --out ar_single.png
+python3 experiment_ar.py --times 10 100 1000 --repeats 20 --out ar_single.png
 ```
 
 ### 例: 複数の epsilon を試す
