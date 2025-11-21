@@ -76,7 +76,7 @@ bash programs/shell/run_experiment.sh --theta-file-lines theta.txt --out theta_{
 
 ### 出力例
 
-下はラッパー実行で得られたプロットの一例です（リポジトリに含まれる `output_eps_1.png` を参照）。
+下はラッパー実行で得られたプロットの一例です（リポジトリに含まれる `sample.png` を参照）。
 
 ![実験出力サンプル](sample.png)
 
