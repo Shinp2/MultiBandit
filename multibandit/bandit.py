@@ -78,7 +78,7 @@ class MultiBandit:
             return random.randint(0, len(self.bandits) - 1)
         else:
             # Exploit: best arm based on current estimates
-            return max(range(len(self.bandits)), 
+            return max(range(len(self.bandits)),
                       key=lambda i: self.bandits[i].estimated_mean)
     
     def run_iteration(self) -> dict:
@@ -134,5 +134,5 @@ class MultiBandit:
         Returns:
             Index of the best arm
         """
-        return max(range(len(self.bandits)), 
+        return max(range(len(self.bandits)),
                   key=lambda i: self.bandits[i].estimated_mean)

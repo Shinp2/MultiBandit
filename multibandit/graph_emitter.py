@@ -142,7 +142,7 @@ class GraphEmitter:
             filename: Output filename
             indent: JSON indentation level
         """
-        with open(filename, 'w') as f:
+        with open(filename, 'w', encoding='utf-8') as f:
             json.dump(self.data, f, indent=indent)
     
     def emit_ascii_graph(self, history: List[dict], width: int = 60) -> str:
