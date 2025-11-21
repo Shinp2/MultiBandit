@@ -69,7 +69,7 @@ class MultiBandit:
         the estimated value and the uncertainty (confidence interval).
         
         Args:
-            t (int): Current time step (total number of pulls)
+            t (int): Total number of pulls so far (can be t or t+1 for the log term)
             c (float): Exploration parameter (default: 2.0)
             
         Returns:
@@ -81,6 +81,7 @@ class MultiBandit:
                 return arm
         
         # Calculate UCB values for each arm
+        # Using t+1 in log is common practice to avoid log(0) edge case
         ucb_values = self.values + c * np.sqrt(
             np.log(t + 1) / (self.counts + EPSILON)
         )
@@ -93,6 +94,10 @@ class MultiBandit:
         Uses Gaussian Thompson Sampling which is appropriate for continuous
         rewards. Samples from a normal distribution centered at the estimated
         value with variance proportional to uncertainty.
+        
+        Note: This uses a simplified variance formula (1/sqrt(precision * count))
+        for computational efficiency. For more accurate uncertainty estimation,
+        one could use the actual sample variance from reward history.
         
         Args:
             precision (float): Prior precision (inverse variance) for rewards (default: 1.0)
@@ -167,6 +172,7 @@ def simulate_bandit(
     true_rewards: List[float],
     n_iterations: int,
     strategy: str = 'epsilon_greedy',
+    noise_std: float = 1.0,
     **strategy_params
 ) -> MultiBandit:
     """
@@ -177,6 +183,7 @@ def simulate_bandit(
         true_rewards (List[float]): True mean reward for each arm
         n_iterations (int): Number of iterations to run
         strategy (str): Strategy to use ('epsilon_greedy', 'ucb', 'thompson')
+        noise_std (float): Standard deviation of reward noise (default: 1.0)
         **strategy_params: Additional parameters for the strategy
         
     Returns:
@@ -202,7 +209,7 @@ def simulate_bandit(
             raise ValueError(f"Unknown strategy: {strategy}")
         
         # Generate reward (Gaussian noise around true reward)
-        reward = np.random.normal(true_rewards[arm], 1.0)
+        reward = np.random.normal(true_rewards[arm], noise_std)
         
         # Update bandit
         bandit.update(arm, reward)
