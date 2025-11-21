@@ -4,7 +4,7 @@
 
 ## 概要
 - `Multibandit.py` : 実験のメイン Python スクリプト（平均報酬の計算やプロット出力などを行います）。
-- 補助スクリプトは `../shell/run_experiment.sh`（ワークフロー用ラッパー）や `../python/experiment_ar.py` にあります。
+- 補助スクリプトは `run_experiment.sh`（ワークフロー用ラッパー）や `experiment_ar.py` にあります。
 
 ## 依存関係
 - Python 3.x
@@ -53,16 +53,5 @@ bash programs/shell/run_experiment.sh --theta-file-lines theta.txt --repeats 10 
 ## 出力
 - プロット画像（PNG）やログを出力します。`--out` オプションで出力ファイルを指定できます。
 
-## トラブルシュート
-- `Permission denied (publickey)` が出る場合は SSH 鍵が GitHub に登録されているか確認してください。`ssh -T git@github.com` で接続テストできます。
-- ラッパーでエラーが出る場合は、まず Python 側のスクリプトを直接 `--help` で確認して、必要な引数が渡されているか確認してください。
-
-## 開発メモ
-- ブランチ運用: デフォルトブランチは `main` です。ローカルに `master` のコミット履歴がある場合、マージや履歴統合の手順が必要になります。
-
 ## ライセンス
-- このリポジトリのライセンスはプロジェクトに合わせて設定してください（必要なら `LICENSE` を追加してください）。
-
----
-もし README に追記してほしい点（例: 実行パラメータの詳細、入出力フォーマットの具体例、よくあるエラーと解決法）があれば教えてください。追記します。
-# MultiBandit
+- このプロジェクトは MIT ライセンスの下で公開されています。詳しくは `LICENSE` ファイルを参照してください。
