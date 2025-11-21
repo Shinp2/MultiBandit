@@ -12,20 +12,38 @@ import argparse
 
 import numpy as np
 import matplotlib.pyplot as plt
+import importlib.util
 
 
 def import_multibandit_module():
-    # Ensure the directory that contains MultiBandit.py is on sys.path
-    # Assumes this repo layout: /home/shinp/programs/python/MultiBandit.py
+    """Locate and import the MultiBandit module.
+
+    This function first tries to directly load a file named
+    MultiBandit.py / Multibandit.py / multibandit.py from the same
+    directory as this script.
+    """
     script_dir = os.path.dirname(__file__)
-    candidate = os.path.join(script_dir, "python")
-    if candidate not in sys.path:
-        sys.path.insert(0, candidate)
-    try:
-        import MultiBandit as mb
-    except Exception as e:
-        raise ImportError(f"failed to import MultiBandit from {candidate}: {e}")
-    return mb
+
+    # 1) Try direct file-based import from the same directory
+    last_exc = None
+    attempted = []
+    for fname in ("MultiBandit.py", "Multibandit.py", "multibandit.py"):
+        path = os.path.join(script_dir, fname)
+        if os.path.isfile(path):
+            try:
+                spec = importlib.util.spec_from_file_location("multibandit_local", path)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                return module
+            except Exception as e:
+                last_exc = e
+        attempted.append(path)
+    
+    msg = f"Failed to import MultiBandit module from script directory. Tried paths:\n" + "\n".join(attempted)
+    if last_exc is not None:
+        raise ImportError(msg) from last_exc
+    else:
+        raise ImportError(msg)
 
 
 def run_experiment(times, repeats, epsilon, theta, python_exe=None):

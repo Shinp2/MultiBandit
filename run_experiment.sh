@@ -1,13 +1,14 @@
-
 #!/usr/bin/env bash
 # Compact wrapper for experiment_ar.py
 
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-PY_SCRIPT="$SCRIPT_DIR/../python/experiment_time_vs_ar.py"
-if [ ! -f "$PY_SCRIPT" ]; then
-	PY_SCRIPT="/home/shinp/programs/python/experiment_ar.py"
+if [ -f "$SCRIPT_DIR/experiment_ar.py" ]; then
+	PY_SCRIPT="$SCRIPT_DIR/experiment_ar.py"
+else
+	echo "python script not found; looked for experiment_ar.py in script dir, ../python, and /home/shinp/programs/python" >&2
+	exit 2
 fi
 
 usage(){
@@ -216,15 +217,40 @@ if [[ -n "$TIMES_FILE_LINES" ]]; then
 	while IFS= read -r line || [[ -n "$line" ]]; do
 		line="$(printf '%s' "$line" | sed -e 's/^\s*//' -e 's/\s*$//')"
 		[[ -z "$line" || "${line:0:1}" == "#" ]] && continue
-		read -ra line_vals <<< "$(printf '%s' "$line" | tr ',' ' ')"
-		# prepare per-run EXTRA_ARGS with unique out
+		read -ra tokens <<< "$(printf '%s' "$line" | tr ',' ' ')"
+		# separate leading numeric time tokens from option tokens
+		times_tokens=()
+		line_opts=()
+		i=0
+		while [[ $i -lt ${#tokens[@]} ]]; do
+			tok=${tokens[$i]}
+			if [[ "$tok" == -* ]]; then
+				# option flag; include possible value if next token doesn't start with '-'
+				line_opts+=("$tok")
+				if [[ $((i+1)) -lt ${#tokens[@]} ]]; then
+					next=${tokens[$((i+1))]}
+					if [[ "$next" != -* ]]; then
+						line_opts+=("$next")
+						i=$((i+1))
+					fi
+				fi
+			else
+				times_tokens+=("$tok")
+			fi
+			i=$((i+1))
+		done
+
+		# prepare per-run EXTRA_ARGS with unique out and per-line options
 		OLD_EXTRA=("${EXTRA_ARGS[@]:-}")
 		if [[ -n "$OUT_TEMPLATE" ]]; then
 			EXTRA_ARGS+=(--out "$(make_out_name "$OUT_TEMPLATE" $n)")
 		else
 			EXTRA_ARGS+=(--out "./output_${n}.png")
 		fi
-		run_once "${line_vals[@]}"
+		# append line-specific options
+		for o in "${line_opts[@]:-}"; do EXTRA_ARGS+=("$o"); done
+
+		run_once "${times_tokens[@]}"
 		EXTRA_ARGS=("${OLD_EXTRA[@]:-}")
 		n=$((n+1))
 	done < "$TIMES_FILE_LINES"
@@ -237,14 +263,36 @@ if [[ -n "$EPS_FILE_LINES" ]]; then
 	while IFS= read -r line || [[ -n "$line" ]]; do
 		line="$(printf '%s' "$line" | sed -e 's/^\s*//' -e 's/\s*$//')"
 		[[ -z "$line" || "${line:0:1}" == "#" ]] && continue
-		read -ra line_vals <<< "$(printf '%s' "$line" | tr ',' ' ')"
+		read -ra tokens <<< "$(printf '%s' "$line" | tr ',' ' ')"
+		# separate leading epsilon tokens from option tokens
+		eps_tokens=()
+		line_opts=()
+		i=0
+		while [[ $i -lt ${#tokens[@]} ]]; do
+			tok=${tokens[$i]}
+			if [[ "$tok" == -* ]]; then
+				line_opts+=("$tok")
+				if [[ $((i+1)) -lt ${#tokens[@]} ]]; then
+					next=${tokens[$((i+1))]}
+					if [[ "$next" != -* ]]; then
+						line_opts+=("$next")
+						i=$((i+1))
+					fi
+				fi
+			else
+				eps_tokens+=("$tok")
+			fi
+			i=$((i+1))
+		done
+
 		OLD_EXTRA=("${EXTRA_ARGS[@]:-}")
 		if [[ -n "$OUT_TEMPLATE" ]]; then
 			EXTRA_ARGS+=(--out "$(make_out_name "$OUT_TEMPLATE" $n)")
 		else
 			EXTRA_ARGS+=(--out "./output_eps_${n}.png")
 		fi
-		run_eps_once "${line_vals[@]}"
+		for o in "${line_opts[@]:-}"; do EXTRA_ARGS+=("$o"); done
+		run_eps_once "${eps_tokens[@]}"
 		EXTRA_ARGS=("${OLD_EXTRA[@]:-}")
 		n=$((n+1))
 	done < "$EPS_FILE_LINES"
@@ -257,14 +305,36 @@ if [[ -n "$KS_FILE_LINES" ]]; then
 	while IFS= read -r line || [[ -n "$line" ]]; do
 		line="$(printf '%s' "$line" | sed -e 's/^\s*//' -e 's/\s*$//')"
 		[[ -z "$line" || "${line:0:1}" == "#" ]] && continue
-		read -ra line_vals <<< "$(printf '%s' "$line" | tr ',' ' ')"
+		read -ra tokens <<< "$(printf '%s' "$line" | tr ',' ' ')"
+		# separate leading K tokens from option tokens
+		ks_tokens=()
+		line_opts=()
+		i=0
+		while [[ $i -lt ${#tokens[@]} ]]; do
+			tok=${tokens[$i]}
+			if [[ "$tok" == -* ]]; then
+				line_opts+=("$tok")
+				if [[ $((i+1)) -lt ${#tokens[@]} ]]; then
+					next=${tokens[$((i+1))]}
+					if [[ "$next" != -* ]]; then
+						line_opts+=("$next")
+						i=$((i+1))
+					fi
+				fi
+			else
+				ks_tokens+=("$tok")
+			fi
+			i=$((i+1))
+		done
+
 		OLD_EXTRA=("${EXTRA_ARGS[@]:-}")
 		if [[ -n "$OUT_TEMPLATE" ]]; then
 			EXTRA_ARGS+=(--out "$(make_out_name "$OUT_TEMPLATE" $n)")
 		else
 			EXTRA_ARGS+=(--out "./output_K_${n}.png")
 		fi
-		run_K_once "${line_vals[@]}"
+		for o in "${line_opts[@]:-}"; do EXTRA_ARGS+=("$o"); done
+		run_K_once "${ks_tokens[@]}"
 		EXTRA_ARGS=("${OLD_EXTRA[@]:-}")
 		n=$((n+1))
 	done < "$KS_FILE_LINES"
@@ -278,17 +348,39 @@ if [[ -n "$THETA_FILE_LINES" ]]; then
 	while IFS= read -r line || [[ -n "$line" ]]; do
 		line="$(printf '%s' "$line" | sed -e 's/^\s*//' -e 's/\s*$//')"
 		[[ -z "$line" || "${line:0:1}" == "#" ]] && continue
-		read -ra line_vals <<< "$(printf '%s' "$line" | tr ',' ' ')"
+		read -ra tokens <<< "$(printf '%s' "$line" | tr ',' ' ')"
+		# separate leading theta tokens from option tokens
+		theta_tokens=()
+		line_opts=()
+		i=0
+		while [[ $i -lt ${#tokens[@]} ]]; do
+			tok=${tokens[$i]}
+			if [[ "$tok" == -* ]]; then
+				line_opts+=("$tok")
+				if [[ $((i+1)) -lt ${#tokens[@]} ]]; then
+					next=${tokens[$((i+1))]}
+					if [[ "$next" != -* ]]; then
+						line_opts+=("$next")
+						i=$((i+1))
+					fi
+				fi
+			else
+				theta_tokens+=("$tok")
+			fi
+			i=$((i+1))
+		done
+
 		OLD_EXTRA=("${EXTRA_ARGS[@]:-}")
 		if [[ -n "$OUT_TEMPLATE" ]]; then
 			EXTRA_ARGS+=(--out "$(make_out_name "$OUT_TEMPLATE" $n)")
 		else
 			EXTRA_ARGS+=(--out "./output_theta_${n}.png")
 		fi
-	# add per-run theta values as args to the generic runner
-	local_k=${#line_vals[@]}
-	echo "Job $n/$total — running theta: ${line_vals[*]} (K=${local_k})"
-	run_generic --theta "${line_vals[@]}" --K "$local_k"
+		for o in "${line_opts[@]:-}"; do EXTRA_ARGS+=("$o"); done
+		# add per-run theta values as args to the generic runner
+		local_k=${#theta_tokens[@]}
+		echo "Job $n/$total — running theta: ${theta_tokens[*]} (K=${local_k})"
+		run_generic --theta "${theta_tokens[@]}" --K "$local_k"
 		EXTRA_ARGS=("${OLD_EXTRA[@]:-}")
 		n=$((n+1))
 	done < "$THETA_FILE_LINES"

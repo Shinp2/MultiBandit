@@ -20,34 +20,47 @@ pip install numpy matplotlib
 ```
 
 ## 使い方（基本）
-リポジトリのルートで以下のように実行します。`Multibandit.py` は必要に応じて引数を持つので、ヘルプを参照してください。
+リポジトリのルートで以下のように実行すると、K=500 t=6500 epsilon=0.1 （thetaは正規分布(mean:0.5,std:0.1)）でサンプリングし、総報酬を出力します。
 
 ```fish
-python3 programs/MultiBandit/Multibandit.py --help
+python3 Multibandit.py
 ```
 
-（このプロジェクトには複数の実験ドライバがあるため、実行例をいくつか示します。）
+このプロジェクトには複数の実験ドライバがあるため、実行例をいくつか示します。
+オプションは排他的なので何れか一つのみ可能です
 
-### 例: 単一実行
+### 例: グラフにプロット
+Kやepsilonを変更して平均報酬をグラフとして出力したいならexperiment_ar.pyを使用します
+--timesオプションでラウンド数をきめることができる
 ```fish
-python3 programs/python/experiment_ar.py --K 10 --fixed-time 1000 --repeats 20 --out ar_single.png
+python3 experiment_ar.py --times 10 100 1000 --fixed-time 1000 --repeats 20 --out ar_single.png
 ```
 
 ### 例: 複数の epsilon を試す
-（ラッパーを使うと楽です）
+--epsilonsでepsilonの値を指定できます。
 ```fish
-bash programs/shell/run_experiment.sh --epsilons 0.01 0.05 0.1 --fixed-time 6500 --repeats 30 --out ./sample.png
+bash run_experiment.sh --epsilons 0.01 0.05 0.1 --fixed-time 6500 --repeats 30 --out ./sample.png
 ```
 
 ### 例: K 列のスイープ
+--Ksで腕の数を指定できます
 ```fish
-python3 programs/python/experiment_ar.py --Ks 10 50 100 --fixed-time 2000 --repeats 10 --out Ks_vs_ar.png
+python3 experiment_ar.py --Ks 10 50 100 --fixed-time 2000 --repeats 10 --out Ks_vs_ar.png
 ```
 
-### 例: ファイルで theta を与える（1行ずつ別プロット）
+### 例: ファイルで オプション を与える（1行ずつ別プロット）
+run_experiment.shを指定することでファイルを読み込ませることができます
+
+- 例1：ファイルをthetaやtimesのみの指定に使用する場合
 ```fish
 # theta.txt に各行が1つの theta 設定（カンマ区切り等 ラッパーのフォーマット参照）
 bash programs/shell/run_experiment.sh --theta-file-lines theta.txt --repeats 10 --out theta_{n}.png
+```
+
+- 例2：ファイルからthetaとオプションを指定するばあい
+```fish
+# theta.txt に各行が1つの theta 設定 + --repeatsなどのオプション指定（カンマ区切り等 ラッパーのフォーマット参照）
+bash programs/shell/run_experiment.sh --theta-file-lines theta.txt
 ```
 
 ## 出力

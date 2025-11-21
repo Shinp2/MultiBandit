@@ -17,8 +17,6 @@ def main():
     epsilon = 0.1  
     numberOfArms = 500
     theta = sample_truncated_normal_on_01(n_samples=numberOfArms, mu=0.5, sigma=0.2)
-    for i, th in enumerate(theta):
-        print(f"arm {i}: theta={th:.4f}")
     AR,arms = MultiBandit(epsilon,theta)
     print("accumulated reword",AR)
     
