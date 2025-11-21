@@ -69,10 +69,10 @@ arm = bandit.select_arm_ucb(t=current_timestep, c=2.0)
 ```
 
 ### Thompson Sampling
-Uses Bayesian inference to select arms based on probability of being optimal.
+Uses Bayesian inference with Gaussian assumption to select arms based on probability of being optimal.
 
 ```python
-arm = bandit.select_arm_thompson_sampling(alpha=1.0, beta=1.0)
+arm = bandit.select_arm_thompson_sampling(precision=1.0)
 ```
 
 ## License

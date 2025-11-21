@@ -9,6 +9,10 @@ import numpy as np
 from typing import List, Optional
 
 
+# Constants
+EPSILON = 1e-5  # Small value to prevent division by zero
+
+
 class MultiBandit:
     """
     Multi-Armed Bandit implementation with various selection strategies.
@@ -78,27 +82,34 @@ class MultiBandit:
         
         # Calculate UCB values for each arm
         ucb_values = self.values + c * np.sqrt(
-            np.log(t + 1) / (self.counts + 1e-5)
+            np.log(t + 1) / (self.counts + EPSILON)
         )
         return int(np.argmax(ucb_values))
     
-    def select_arm_thompson_sampling(self, alpha: float = 1.0, beta: float = 1.0) -> int:
+    def select_arm_thompson_sampling(self, precision: float = 1.0) -> int:
         """
-        Select an arm using Thompson Sampling (Bayesian approach).
+        Select an arm using Thompson Sampling with Gaussian assumption.
         
-        Assumes Beta prior for Bernoulli rewards. For continuous rewards,
-        this serves as an approximation.
+        Uses Gaussian Thompson Sampling which is appropriate for continuous
+        rewards. Samples from a normal distribution centered at the estimated
+        value with variance proportional to uncertainty.
         
         Args:
-            alpha (float): Alpha parameter for Beta prior (default: 1.0)
-            beta (float): Beta parameter for Beta prior (default: 1.0)
+            precision (float): Prior precision (inverse variance) for rewards (default: 1.0)
             
         Returns:
             int: Index of the selected arm
         """
-        samples = np.random.beta(
-            alpha + self.counts,
-            beta + (np.sum(self.counts) - self.counts + 1)
+        # If any arm hasn't been pulled yet, pull it first
+        for arm in range(self.n_arms):
+            if self.counts[arm] == 0:
+                return arm
+        
+        # Sample from posterior distributions (Gaussian with decreasing variance)
+        # Variance decreases as we get more samples
+        samples = np.random.normal(
+            self.values,
+            1.0 / np.sqrt(precision * self.counts + EPSILON)
         )
         return int(np.argmax(samples))
     
@@ -185,9 +196,8 @@ def simulate_bandit(
             c = strategy_params.get('c', 2.0)
             arm = bandit.select_arm_ucb(t, c)
         elif strategy == 'thompson':
-            alpha = strategy_params.get('alpha', 1.0)
-            beta = strategy_params.get('beta', 1.0)
-            arm = bandit.select_arm_thompson_sampling(alpha, beta)
+            precision = strategy_params.get('precision', 1.0)
+            arm = bandit.select_arm_thompson_sampling(precision)
         else:
             raise ValueError(f"Unknown strategy: {strategy}")
         
