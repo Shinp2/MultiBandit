@@ -16,6 +16,8 @@ class Bandit:
         Args:
             true_mean: The true mean reward for this arm (0-1)
         """
+        if not 0 <= true_mean <= 1:
+            raise ValueError("true_mean must be between 0 and 1")
         self.true_mean = true_mean
         self.estimated_mean = 0.0
         self.num_pulls = 0
@@ -54,6 +56,10 @@ class MultiBandit:
             bandits: List of Bandit arms
             epsilon: Exploration rate (0-1), default 0.1
         """
+        if not bandits:
+            raise ValueError("bandits list cannot be empty")
+        if not 0 <= epsilon <= 1:
+            raise ValueError("epsilon must be between 0 and 1")
         self.bandits = bandits
         self.epsilon = epsilon
         self.total_reward = 0.0
@@ -113,6 +119,9 @@ class MultiBandit:
         Returns:
             List of iteration results
         """
+        if num_iterations <= 0:
+            raise ValueError("num_iterations must be positive")
+        
         for _ in range(num_iterations):
             self.run_iteration()
         

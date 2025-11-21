@@ -17,6 +17,13 @@ class TestBandit(unittest.TestCase):
         self.assertEqual(bandit.estimated_mean, 0.0)
         self.assertEqual(bandit.num_pulls, 0)
     
+    def test_bandit_invalid_true_mean(self):
+        """Test bandit with invalid true_mean."""
+        with self.assertRaises(ValueError):
+            Bandit(true_mean=1.5)
+        with self.assertRaises(ValueError):
+            Bandit(true_mean=-0.1)
+    
     def test_bandit_pull(self):
         """Test bandit pull returns valid reward."""
         bandit = Bandit(true_mean=0.5)
@@ -51,6 +58,18 @@ class TestMultiBandit(unittest.TestCase):
         self.assertEqual(self.multi_bandit.num_iterations, 0)
         self.assertEqual(len(self.multi_bandit.history), 0)
     
+    def test_multibandit_empty_bandits(self):
+        """Test multi-bandit with empty bandits list."""
+        with self.assertRaises(ValueError):
+            MultiBandit([], epsilon=0.1)
+    
+    def test_multibandit_invalid_epsilon(self):
+        """Test multi-bandit with invalid epsilon."""
+        with self.assertRaises(ValueError):
+            MultiBandit(self.bandits, epsilon=1.5)
+        with self.assertRaises(ValueError):
+            MultiBandit(self.bandits, epsilon=-0.1)
+    
     def test_select_arm(self):
         """Test arm selection."""
         arm = self.multi_bandit.select_arm()
@@ -74,6 +93,13 @@ class TestMultiBandit(unittest.TestCase):
         self.assertEqual(len(history), 100)
         self.assertEqual(self.multi_bandit.num_iterations, 100)
         self.assertGreater(sum(b.num_pulls for b in self.bandits), 0)
+    
+    def test_run_invalid_iterations(self):
+        """Test running with invalid number of iterations."""
+        with self.assertRaises(ValueError):
+            self.multi_bandit.run(num_iterations=0)
+        with self.assertRaises(ValueError):
+            self.multi_bandit.run(num_iterations=-10)
     
     def test_get_best_arm(self):
         """Test getting best arm."""
@@ -150,6 +176,13 @@ class TestGraphEmitter(unittest.TestCase):
         self.assertIsInstance(ascii_graph, str)
         self.assertIn("Average Reward", ascii_graph)
         self.assertIn("Iterations", ascii_graph)
+    
+    def test_emit_ascii_graph_invalid_width(self):
+        """Test ASCII graph with invalid width."""
+        with self.assertRaises(ValueError):
+            self.emitter.emit_ascii_graph(self.history, width=0)
+        with self.assertRaises(ValueError):
+            self.emitter.emit_ascii_graph(self.history, width=-10)
     
     def test_empty_history(self):
         """Test emitter with empty history."""

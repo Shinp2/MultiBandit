@@ -84,6 +84,10 @@ class GraphEmitter:
         if not history:
             return {}
         
+        # Validate history structure
+        if 'arm_estimates' not in history[0]:
+            return {}
+        
         num_arms = len(history[0]['arm_estimates'])
         iterations = [h['iteration'] for h in history]
         
@@ -154,6 +158,9 @@ class GraphEmitter:
         """
         if not history:
             return "No data to graph"
+        
+        if width <= 0:
+            raise ValueError("width must be positive")
         
         avg_rewards = [h['avg_reward'] for h in history]
         iterations = [h['iteration'] for h in history]
