@@ -54,15 +54,23 @@ run_experiment.shを指定することでファイルを読み込ませること
 - 例1：ファイルをthetaやtimesのみの指定に使用する場合
 ```fish
 # theta.txt に各行が1つの theta 設定（カンマ区切り等 ラッパーのフォーマット参照）
+# theta.txt
+0 0.01 0.02 0.03 0.04
+0 0.1 0.2 0.3 0.4
+
 bash programs/shell/run_experiment.sh --theta-file-lines theta.txt --repeats 10 --out theta_{n}.png
 ```
 
-- 例2：ファイルからthetaとオプションを指定するばあい
+- 例2：ファイルからthetaとオプションを指定する場合
 ```fish
 # theta.txt に各行が1つの theta 設定 + --repeatsなどのオプション指定（カンマ区切り等 ラッパーのフォーマット参照）
-bash programs/shell/run_experiment.sh --theta-file-lines theta.txt
-```
+# theta.txt
+0 0.01 0.02 0.03 0.04 --repeat 3 --fixed-time 20 
+0 0.1 0.2 0.3 0.4 --repeat 10 --fixed-time 30
 
+bash programs/shell/run_experiment.sh --theta-file-lines theta.txt --out theta_{n}.png
+```
+他にも--times-file-linesや--Ks-file-lineでも同様の処理が可能です
 ## 出力
 - プロット画像（PNG）やログを出力します。`--out` オプションで出力ファイルを指定できます。
 
