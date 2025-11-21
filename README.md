@@ -70,7 +70,7 @@ bash programs/shell/run_experiment.sh --theta-file-lines theta.txt --repeats 10 
 
 bash programs/shell/run_experiment.sh --theta-file-lines theta.txt --out theta_{n}.png
 ```
-他にも--times-file-linesや--Ks-file-lineでも同様の処理が可能です
+他にも--times-file-linesや--Ks-file-linesでも同様の処理が可能です
 ## 出力
 - プロット画像（PNG）やログを出力します。`--out` オプションで出力ファイルを指定できます。
 
