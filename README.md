@@ -10,28 +10,7 @@
 - Python 3.x
 - numpy
 - matplotlib
-
-## 信頼区間と収束判定
-
-このプロジェクトでは各点の「95% 信頼区間（CI）の半幅」を計算して、収束判定に利用できます。
-デフォルトでは CI の信頼度は 95%（`--ci-conf 0.95`）、収束判定の閾値（per-step の CI 半幅）は 0.01（`--ci-threshold 0.01`）です。
-
-- 実装ファイル: `experiment_ar.py`（プロット／CLI）
-- CI ヘルパー: `ci_utils.py`（`ci_halfwidth(vals, conf)` を提供）
-- 判定ルール: per-step の CI 半幅 <= `--ci-threshold` を満たす点を「収束」と見なし、青でプロットします。満たさない点は赤でプロットします。
-
-例:
-
-```fish
-python3 experiment_ar.py --times 10 50 100 --repeats 30 \
-	--ci-conf 0.95 --ci-threshold 0.01 --out time_vs_reward.png
-```
-
-説明:
-- `--ci-conf` は信頼水準（0.95 など）を指定します。scipy が利用できる環境では t 分布に基づく臨界値を使用し、より正確な CI を算出します。
-- `--ci-threshold` は per-step（AR を time で割った値）での CI 半幅の閾値です。小さい値を指定すると収束判定が厳しくなります。
-- サンプル数（`--repeats`）が小さいと CI が広くなりやすいため、安定した判定を得るには `--repeats` を十分大きくしてください。
-
+  
 インストール例（Debian/Ubuntu）:
 ```fish
 python3 -m venv .venv
@@ -94,6 +73,28 @@ bash run_experiment.sh --theta-file-lines theta.txt --out theta_{n}.png
 他にも--times-file-linesや--Ks-file-linesでも同様の処理が可能です
 ## 出力
 - プロット画像（PNG）やログを出力します。`--out` オプションで出力ファイルを指定できます。
+
+## 信頼区間と収束判定
+
+このプロジェクトでは各点の「95% 信頼区間（CI）の半幅」を計算して、収束判定に利用できます。
+デフォルトでは CI の信頼度は 95%（`--ci-conf 0.95`）、収束判定の閾値（per-step の CI 半幅）は 0.01（`--ci-threshold 0.01`）です。
+
+- 実装ファイル: `experiment_ar.py`（プロット／CLI）
+- CI ヘルパー: `ci_utils.py`（`ci_halfwidth(vals, conf)` を提供）
+- 判定ルール: per-step の CI 半幅 <= `--ci-threshold` を満たす点を「収束」と見なし、青でプロットします。満たさない点は赤でプロットします。
+
+例:
+
+```fish
+python3 experiment_ar.py --times 10 50 100 --repeats 30 \
+	--ci-conf 0.95 --ci-threshold 0.01 --out time_vs_reward.png
+```
+
+説明:
+- `--ci-conf` は信頼水準（0.95 など）を指定します。scipy が利用できる環境では t 分布に基づく臨界値を使用し、より正確な CI を算出します。
+- `--ci-threshold` は per-step（AR を time で割った値）での CI 半幅の閾値です。小さい値を指定すると収束判定が厳しくなります。
+- サンプル数（`--repeats`）が小さいと CI が広くなりやすいため、安定した判定を得るには `--repeats` を十分大きくしてください。
+
 
 ### 出力例
 
