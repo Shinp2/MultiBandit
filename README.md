@@ -44,7 +44,7 @@ bash run_experiment.sh --epsilons 0.01 0.05 0.1 --fixed-time 6500 --repeats 30 -
 ```fish
 python3 experiment_ar.py --Ks 10 50 100 --fixed-time 2000 --repeats 10 --out Ks_vs_ar.png
 ```
-## 信頼区間と収束判定
+### 信頼区間と収束判定
 
 このプロジェクトでは各点の「95% 信頼区間（CI）の半幅」を計算して、収束判定に利用できます。
 デフォルトでは CI の信頼度は 95%（`--ci-conf 0.95`）、収束判定の閾値（per-step の CI 半幅）は 0.01（`--ci-threshold 0.01`）です。
