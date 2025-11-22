@@ -10,14 +10,7 @@ else
 	echo "python script not found; looked for experiment_ar.py in script dir, ../python, and /home/shinp/programs/python" >&2
 	exit 2
 fi
-
-usage(){
-	cat <<-USAGE
-Usage: $0 [--times X Y ...] [--times-file FILE] [--times-file-lines FILE] [--epsilons-file FILE] [--Ks K1 K2 ...] [--Ks-file FILE] [--Ks-file-lines FILE] [--theta-file FILE] [--theta-file-lines FILE] [--out TEMPLATE] [other args...]
-If a *-file-lines option is used, the script will run once per non-empty line; use {n} in --out to inject line number.
-USAGE
-}
-
+ 
 make_out_name(){
 	local tmpl="$1" n="$2"
 	if [[ "$tmpl" == *"{n}"* ]]; then
@@ -31,7 +24,6 @@ make_out_name(){
 		printf '%s' "${base}_$n.$ext"
 	fi
 }
-
 run_once(){
 	local times_args=("$@")
 	local cmd=(python3 "$PY_SCRIPT" --times)
@@ -40,8 +32,14 @@ run_once(){
 	# measure elapsed time for the command
 	local start end elapsed
 	start=$(date +%s.%N)
-	echo "Running: ${cmd[*]}"
-	"${cmd[@]}"
+	# filter out any empty args (defensive) before running
+	filtered_cmd=()
+	for _a in "${cmd[@]}"; do
+		[[ -n "$_a" ]] || continue
+		filtered_cmd+=("$_a")
+	done
+	echo "Running: ${filtered_cmd[*]}"
+	"${filtered_cmd[@]}"
 	end=$(date +%s.%N)
 	elapsed=$(awk -v e="$end" -v s="$start" 'BEGIN{printf "%.3f", e - s}')
 	echo "Elapsed: ${elapsed}s"
@@ -54,8 +52,13 @@ run_eps_once(){
 	for ea in "${EXTRA_ARGS[@]:-}"; do cmd+=("$ea"); done
 	local start end elapsed
 	start=$(date +%s.%N)
-	echo "Running: ${cmd[*]}"
-	"${cmd[@]}"
+	filtered_cmd=()
+	for _a in "${cmd[@]}"; do
+		[[ -n "$_a" ]] || continue
+		filtered_cmd+=("$_a")
+	done
+	echo "Running: ${filtered_cmd[*]}"
+	"${filtered_cmd[@]}"
 	end=$(date +%s.%N)
 	elapsed=$(awk -v e="$end" -v s="$start" 'BEGIN{printf "%.3f", e - s}')
 	echo "Elapsed: ${elapsed}s"
@@ -64,12 +67,17 @@ run_eps_once(){
 run_K_once(){
     local ks_args=("$@")
     local cmd=(python3 "$PY_SCRIPT" --Ks)
-    for k in "${ks_args[@]}"; do cmd+=("$k"); done
-    for ea in "${EXTRA_ARGS[@]:-}"; do cmd+=("$ea"); done
+	for k in "${ks_args[@]}"; do cmd+=("$k"); done
+	for ea in "${EXTRA_ARGS[@]:-}"; do cmd+=("$ea"); done
 	local start end elapsed
 	start=$(date +%s.%N)
-	echo "Running: ${cmd[*]}"
-	"${cmd[@]}"
+	filtered_cmd=()
+	for _a in "${cmd[@]}"; do
+		[[ -n "$_a" ]] || continue
+		filtered_cmd+=("$_a")
+	done
+	echo "Running: ${filtered_cmd[*]}"
+	"${filtered_cmd[@]}"
 	end=$(date +%s.%N)
 	elapsed=$(awk -v e="$end" -v s="$start" 'BEGIN{printf "%.3f", e - s}')
 	echo "Elapsed: ${elapsed}s"
@@ -90,8 +98,13 @@ run_generic(){
 
 	local start end elapsed
 	start=$(date +%s.%N)
-	echo "Running: ${cmd[*]}"
-	"${cmd[@]}"
+	filtered_cmd=()
+	for _a in "${cmd[@]}"; do
+		[[ -n "$_a" ]] || continue
+		filtered_cmd+=("$_a")
+	done
+	echo "Running: ${filtered_cmd[*]}"
+	"${filtered_cmd[@]}"
 	end=$(date +%s.%N)
 	elapsed=$(awk -v e="$end" -v s="$start" 'BEGIN{printf "%.3f", e - s}')
 	echo "Elapsed: ${elapsed}s"
@@ -154,6 +167,13 @@ while [[ $# -gt 0 ]]; do
 			OUT_TEMPLATE="$2"; shift 2;;
 		--out=*)
 			OUT_TEMPLATE="${1#--out=}"; shift;;
+		--converge)
+			# forward converge flag to python
+			EXTRA_ARGS+=(--converge); shift;;
+		--no-converge)
+			# forward no-converge flag to python
+			EXTRA_ARGS+=(--no-converge); shift;;
+		
 		--help|-h)
 			usage; exit 0;;
 		--)
@@ -177,6 +197,7 @@ while [[ $# -gt 0 ]]; do
 			;;
 	esac
 done
+
 
 # If --Ks was present on command line, add it to EXTRA_ARGS so it is forwarded
 if [[ ${#KS[@]} -gt 0 ]]; then
