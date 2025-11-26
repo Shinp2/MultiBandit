@@ -56,8 +56,7 @@ python3 experiment_ar.py --Ks 10 50 100 --fixed-time 2000 --repeats 10 --out Ks_
 例:
 
 ```fish
-python3 experiment_ar.py --times 10 50 100 --repeats 30 \
-	--ci-conf 0.95 --ci-threshold 0.01 --out time_vs_reward.png
+python3 experiment_ar.py --times 10 50 100 --repeats 30 --ci-conf 0.95 --ci-threshold 0.01 --out time_vs_reward.png
 ```
 
 説明:
